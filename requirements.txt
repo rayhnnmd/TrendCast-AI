@@ -1,0 +1,9 @@
+google-genai
+edge-tts
+gtts
+praw
+moviepy
+requests
+python-dotenv
+feedparser
+Pillow<10.0.0
