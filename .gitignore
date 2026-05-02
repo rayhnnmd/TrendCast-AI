@@ -1,0 +1,18 @@
+# API Keys - never commit this
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Output files (videos/audio are large)
+output/
+
+# Virtual environment if you use one
+venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
