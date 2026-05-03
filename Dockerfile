@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix ImageMagick policy to allow PDF/Text operations
-RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
+# Fix ImageMagick policy to allow text rendering (flexible path for different versions)
+RUN find /etc/ImageMagick* -name "policy.xml" -exec sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' {} +
 
 # Set the working directory in the container
 WORKDIR /app
@@ -24,7 +24,7 @@ COPY . .
 # Create output directories
 RUN mkdir -p output/videos output/audio output/backgrounds output/scheduler output/temp credentials
 
-# Set environment variables (Override these in your deployment platform)
+# Set environment variables
 ENV FLASK_APP=app.py
 ENV PYTHONUNBUFFERED=1
 
