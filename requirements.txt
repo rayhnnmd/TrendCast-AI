@@ -2,7 +2,7 @@ flask
 flask-cors
 python-dotenv
 google-generativeai
-moviepy
+moviepy==1.0.3
 pillow
 requests
 elevenlabs
@@ -16,3 +16,6 @@ httpx
 beautifulsoup4
 lxml
 newsapi-python
+decorator==4.4.2
+imageio==2.25.1
+imageio-ffmpeg==0.4.8
