@@ -120,4 +120,7 @@ if __name__ == '__main__':
     os.makedirs('output/audio', exist_ok=True)
     os.makedirs('output/backgrounds', exist_ok=True)
     os.makedirs('output/scheduler', exist_ok=True)
-    app.run(debug=True, port=5000)
+    
+    # Render/Railway dynamic port binding
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
