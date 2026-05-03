@@ -1,8 +1,7 @@
 import os
 import json
 from datetime import datetime
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 def generate_social_caption(script):
     """
@@ -13,7 +12,8 @@ def generate_social_caption(script):
         if not api_key:
             return "Check out today's top news! #TrendCast #News #AI"
 
-        client = genai.Client(api_key=api_key)
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-flash-latest")
         
         prompt = f"""
 Based on this video script, write a viral social media caption for TikTok/Instagram/YouTube Shorts.
@@ -29,11 +29,9 @@ SCRIPT:
 
 Caption:
 """
-        response = client.models.generate_content(
-            model="gemini-flash-latest",
-            contents=prompt
-        )
+        response = model.generate_content(prompt)
         return response.text.strip()
+
     except Exception as e:
         print(f"[WARNING] Could not generate AI caption: {e}")
         return "New update from TrendCast AI! #News #AI #Trending"

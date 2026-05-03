@@ -12,8 +12,22 @@ from moviepy.config import change_settings
 TEMP_DIR = os.path.join(os.getcwd(), "output", "temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
-# Update this path to match your Magick.exe location
-change_settings({"IMAGEMAGICK_BINARY": r"C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe"})
+# Configure ImageMagick path based on environment
+if os.name == 'nt':
+    # Windows path
+    magick_path = r"C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe"
+    change_settings({"IMAGEMAGICK_BINARY": magick_path})
+else:
+    # Linux/Docker path
+    # On most Linux systems, it's 'convert' or 'magick'
+    import shutil
+    magick_bin = shutil.which("magick") or shutil.which("convert") or "/usr/bin/convert"
+    change_settings({"IMAGEMAGICK_BINARY": magick_bin})
+
+# Set a platform-independent font
+DEFAULT_FONT = "Arial" if os.name == 'nt' else "Liberation-Sans"
+
+
 
 def assemble_video(script, audio_path, background_path=None):
     """
@@ -44,7 +58,7 @@ def assemble_video(script, audio_path, background_path=None):
             "BREAKING NEWS", 
             fontsize=60, 
             color="white", 
-            font="Arial"
+            font=DEFAULT_FONT
         ).set_position(("center", 163)).set_duration(duration)
         
         # Captions
@@ -58,7 +72,7 @@ def assemble_video(script, audio_path, background_path=None):
                 chunk,
                 fontsize=58,
                 color="white",
-                font="Arial",
+                font=DEFAULT_FONT,
                 size=(980, None),
                 method="caption",
                 align="center"
@@ -72,7 +86,7 @@ def assemble_video(script, audio_path, background_path=None):
             "TrendCast AI", 
             fontsize=32, 
             color="gray", 
-            font="Arial"
+            font=DEFAULT_FONT
         ).set_position(("center", 1820)).set_duration(duration)
         
         # Composite
