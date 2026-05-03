@@ -35,5 +35,7 @@ ENV PYTHONUNBUFFERED=1
 # Expose port 5000
 EXPOSE 5000
 
-# Start the application
-CMD ["python", "app.py"]
+# Start the application using Gunicorn
+# Using 1 worker because task state is stored in-memory
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--timeout", "600", "app:app"]
+

@@ -21,3 +21,4 @@ newsapi-python
 decorator==4.4.2
 imageio==2.25.1
 imageio-ffmpeg==0.4.8
+gunicorn
