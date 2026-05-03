@@ -59,9 +59,8 @@ TrendCast-AI solves this by automating the entire workflow:
 ## Demo Video
 A demo of this automated workflow is available here:
 
-**Demo video is [here]([https://drive.google.com/file/d/1NKSMIRsb-d_QAp8WhFLZTyNd0E2i20mB/view?usp=sharing](https://drive.google.com/file/d/1Mug-l0V5OKrRSgI3OzZOQDP9cDGAc57J/view?usp=drive_link))
+Demo video is [here]([https://drive.google.com/file/d/1NKSMIRsb-d_QAp8WhFLZTyNd0E2i20mB/view?usp=sharing](https://drive.google.com/file/d/1Mug-l0V5OKrRSgI3OzZOQDP9cDGAc57J/view?usp=drive_link))
 
-> Replace the link above with your actual Google Drive demo video URL.
 
 ## Notes
 - Make sure `ffmpeg` is installed and available on your system path for video processing.
