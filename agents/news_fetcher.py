@@ -1,42 +1,62 @@
 import os
-from google import genai
+import requests
 
-def fetch_trending_news() -> str:
+def fetch_top_news(genre):
     """
-    Fetches the top 5 trending news stories of the day using Gemini's Google Search Retrieval tool.
-    Returns the result as a string containing punchy titles, key facts, and why people care.
+    Fetches top news headlines from NewsAPI based on the selected genre.
+    Returns a formatted string of news stories.
     """
     try:
-        print(" Initializing news fetcher...")
-        api_key = os.environ.get("GEMINI_API_KEY")
+        api_key = os.getenv("NEWS_API_KEY")
         if not api_key:
-            raise ValueError("GEMINI_API_KEY environment variable not set.")
-        
-        client = genai.Client(api_key=api_key)
-        
-        prompt = (
-            "Fetch the top 5 trending news stories of the day. "
-            "For each story, provide:\n"
-            "- A punchy title\n"
-            "- Three key facts\n"
-            "- Why people care\n"
-            "Format the output clearly."
-        )
-        
-        print(" Searching for trending news...")
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
-        print(" News fetched successfully!")
-        
-        return response.text
-        
-    except Exception as e:
-        print(f" Error fetching news: {e}")
-        return ""
+            print("[ERROR] NEWS_API_KEY not found in environment.")
+            return None
 
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
-    print(fetch_trending_news())
+        genre_map = {
+            "Technology": "technology",
+            "Politics": "general",
+            "Business": "business",
+            "Sports": "sports",
+            "Science": "science",
+            "Entertainment": "entertainment",
+            "World News": "general"
+        }
+
+        category = genre_map.get(genre, "general")
+        url = "https://newsapi.org/v2/top-headlines"
+        params = {
+            "apiKey": api_key,
+            "category": category,
+            "pageSize": 5,
+            "language": "en",
+            "country": "us"
+        }
+
+        response = requests.get(url, params=params)
+        data = response.json()
+
+        if response.status_code != 200:
+            print(f"[ERROR] NewsAPI Error: {data.get('message', 'Unknown error')}")
+            return None
+
+        articles = data.get("articles", [])
+        formatted_news = []
+        count = 1
+
+        for art in articles:
+            title = art.get("title")
+            desc = art.get("description")
+            source = art.get("source", {}).get("name")
+
+            if title and desc:
+                formatted_news.append(f"{count}. [{source}] {title}\n   {desc}")
+                count += 1
+
+        if not formatted_news:
+            return "No relevant news found for this genre."
+
+        return "\n\n".join(formatted_news)
+
+    except Exception as e:
+        print(f"[ERROR] news_fetcher: {e}")
+        return None

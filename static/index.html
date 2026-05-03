@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendCast AI | Professional Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --bg-card: #0f172a;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --sidebar-width: 280px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); display: flex; min-height: 100vh; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); background-color: #000; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2.5rem 1.5rem; z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 3.5rem; display: flex; align-items: center; gap: 0.75rem; background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-item { padding: 1rem 1.25rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 1rem; color: var(--text-dim); text-decoration: none; margin-bottom: 0.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; font-weight: 500; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: var(--text-main); box-shadow: inset 0 0 0 1px var(--accent); }
+
+        /* Main Content */
+        .main-container { flex: 1; overflow-y: auto; padding: 3rem 4rem; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3.5rem; }
+        .header-title h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
+        .stat-card { background: var(--bg-card); padding: 1.75rem; border-radius: 1.25rem; border: 1px solid var(--border); }
+        .stat-card h3 { color: var(--text-dim); font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; }
+
+        /* Dashboard Content */
+        .dashboard-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 2.5rem; }
+        .card { background: var(--bg-card); border-radius: 1.5rem; border: 1px solid var(--border); padding: 2rem; margin-bottom: 2rem; }
+        .card-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 1.25rem; font-weight: 600; }
+
+        /* Genre Selector */
+        .genre-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .genre-chip { background: var(--bg-deep); border: 1px solid var(--border); padding: 1.25rem; border-radius: 1rem; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.2s; }
+        .genre-chip.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+
+        .btn-action { width: 100%; background: var(--accent); color: white; border: none; padding: 1.25rem; border-radius: 1rem; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+
+        /* Live Logs */
+        .log-terminal { margin-top: 2rem; background: #000; border-radius: 1rem; padding: 1.5rem; height: 350px; overflow-y: scroll; font-family: 'Fira Code', monospace; font-size: 0.875rem; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem; }
+        .log-entry { padding: 0.75rem 1rem; border-radius: 0.5rem; background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent); transition: all 0.3s; }
+        .log-entry:last-child { background: rgba(59, 130, 246, 0.1); border-left-color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .log-msg { color: #fff; }
+
+        /* History Stack */
+        .history-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+        .history-card { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 1.25rem; padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center; }
+        .video-preview { width: 100px; height: 150px; background: #000; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 2rem; flex-shrink: 0; }
+
+        /* Accounts Row */
+        .account-row { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: var(--bg-card); border-radius: 1.25rem; border: 1px solid var(--border); margin-bottom: 1rem; }
+        .acc-info { display: flex; align-items: center; gap: 1.25rem; }
+        .acc-info i { font-size: 2rem; }
+        .fa-youtube { color: #ff0000; }
+        .fa-instagram { color: #e1306c; }
+        .btn-connect { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.625rem 1.25rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; }
+
+        /* Overlays & Modals */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid var(--border); z-index: 3000; display: none; width: 600px; max-width: 90vw; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+        
+        textarea { width: 100%; height: 200px; background: #000; border: 1px solid var(--border); border-radius: 0.75rem; color: var(--success); padding: 1rem; font-family: monospace; resize: none; margin-bottom: 1.5rem; }
+        .spinner { width: 60px; height: 60px; border: 4px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo"><i class="fas fa-bolt"></i><span>TRENDCAST.AI</span></div>
+        <div class="nav-item active" data-view="home"><i class="fas fa-home"></i> Home</div>
+        <div class="nav-item" data-view="history"><i class="fas fa-history"></i> History</div>
+        <div class="nav-item" data-view="accounts"><i class="fas fa-user-circle"></i> Accounts</div>
+    </nav>
+
+    <main class="main-container">
+        <!-- HOME VIEW -->
+        <div id="view-home" class="view active">
+            <header><div class="header-title"><h1>Production Studio</h1><p>Generate viral content with AI agents.</p></div></header>
+            <div class="stats-grid">
+                <div class="stat-card"><h3>Active Tasks</h3><div class="value" id="stat-active">0</div></div>
+                <div class="stat-card"><h3>Videos Generated</h3><div class="value" id="stat-total">0</div></div>
+                <div class="stat-card"><h3>Scheduled Posts</h3><div class="value" id="stat-scheduled">0</div></div>
+                <div class="stat-card"><h3>System Status</h3><div class="value" style="color: var(--success)">Healthy</div></div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="left-panel">
+                    <div class="card">
+                        <div class="card-header"><h2 class="card-title">Launch Pipeline</h2></div>
+                        <div class="genre-group">
+                            <div class="genre-chip active" data-genre="Technology">Technology</div>
+                            <div class="genre-chip" data-genre="Business">Business</div>
+                            <div class="genre-chip" data-genre="Politics">Politics</div>
+                            <div class="genre-chip" data-genre="Science">Science</div>
+                            <div class="genre-chip" data-genre="Entertainment">Entertainment</div>
+                            <div class="genre-chip" data-genre="Sports">Sports</div>
+                        </div>
+                        <button class="btn-action" id="btn-start"><i class="fas fa-play"></i> START PIPELINE</button>
+                        <div class="log-terminal" id="terminal" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="right-panel">
+                    <div class="card"><div class="card-header"><h2 class="card-title">Recent Activity</h2></div><div class="history-stack" id="recent-history"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div id="view-history" class="view">
+            <header><div class="header-title"><h1>Production History</h1><p>Full list of your AI-generated assets.</p></div></header>
+            <div class="history-stack" id="full-history"></div>
+        </div>
+
+        <!-- ACCOUNTS VIEW -->
+        <div id="view-accounts" class="view">
+            <header><div class="header-title"><h1>Connected Accounts</h1><p>Manage your social channel integrations.</p></div></header>
+            <div id="accounts-list"></div>
+        </div>
+    </main>
+
+    <!-- MODALS -->
+    <div class="overlay" id="loader"><div class="spinner"></div><h2 style="margin-top: 2rem;">Agent Working...</h2></div>
+    
+    <!-- Video Player Modal -->
+    <div class="overlay" id="video-player-modal" onclick="closePlayer()">
+        <div class="card" style="width: 400px; height: 700px; position: relative; padding: 0; overflow: hidden;" onclick="event.stopPropagation()">
+            <video id="main-video" style="width: 100%; height: 100%; object-fit: cover;" controls></video>
+            <i class="fas fa-times" style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 1.5rem; color: #fff; cursor: pointer; text-shadow: 0 0 10px #000;" onclick="closePlayer()"></i>
+        </div>
+    </div>
+
+    <div class="modal" id="setup-modal">
+        <div class="modal-header"><h2>Connect YouTube</h2><i class="fas fa-times" style="cursor: pointer;" onclick="closeModal('setup-modal')"></i></div>
+        <p style="color: var(--text-dim); margin-bottom: 1.5rem;">Paste the contents of your <b>client_secrets.json</b> file below to enable YouTube uploads.</p>
+        <textarea id="json-input" placeholder='{ "installed": { "client_id": "...", ... } }'></textarea>
+        <button class="btn-action" onclick="submitCredentials()">SAVE & CONNECT</button>
+    </div>
+
+    <script>
+        let selectedGenre = "Technology";
+        let currentTaskId = null;
+
+        // View Switching
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const view = item.dataset.view;
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.getElementById(`view-${view}`).classList.add('active');
+                if (view === 'history') updateHistory();
+                if (view === 'accounts') updateAccounts();
+            });
+        });
+
+        // Genre Selection
+        document.querySelectorAll('.genre-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selectedGenre = chip.dataset.genre;
+            });
+        });
+
+        async function updateHistory() {
+            const res = await fetch('/api/history');
+            const data = await res.json();
+            const recent = document.getElementById('recent-history');
+            const full = document.getElementById('full-history');
+            
+            const html = data.reverse().map(item => {
+                // Convert local path to web URL
+                const videoUrl = item.video_path.replace(/\\/g, '/');
+                return `
+                <div class="history-card" onclick="playVideo('/${videoUrl}')" style="cursor: pointer;">
+                    <div class="video-preview"><i class="fas fa-play"></i></div>
+                    <div class="video-meta">
+                        <h4>${item.platform} Shorts</h4>
+                        <p>${item.schedule_time}</p>
+                        <p style="color: var(--success); font-weight: 600; margin-top: 0.5rem;">READY TO VIEW</p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            recent.innerHTML = html.slice(0, 3) || '<p style="color: var(--text-dim); text-align: center;">No activity yet.</p>';
+            full.innerHTML = html || '<p style="color: var(--text-dim); text-align: center;">No videos found.</p>';
+            document.getElementById('stat-total').innerText = data.length;
+        }
+
+        function playVideo(url) {
+            const player = document.getElementById('video-player-modal');
+            const video = document.getElementById('main-video');
+            video.src = url;
+            player.style.display = 'flex';
+            video.play();
+        }
+
+        function closePlayer() {
+            const player = document.getElementById('video-player-modal');
+            const video = document.getElementById('main-video');
+            video.pause();
+            player.style.display = 'none';
+        }
+
+        async function updateAccounts() {
+            const res = await fetch('/api/accounts');
+            const data = await res.json();
+            document.getElementById('accounts-list').innerHTML = data.map(acc => `
+                <div class="account-row">
+                    <div class="acc-info"><i class="fab ${acc.icon}"></i><div><b>${acc.platform}</b><p>${acc.name}</p></div></div>
+                    ${acc.status === 'connected' ? '<b style="color: var(--success)">CONNECTED</b>' : `<button class="btn-connect" onclick="openConnect('${acc.platform}')">Connect</button>`}
+                </div>
+            `).join('');
+        }
+
+        function openConnect(platform) {
+            if (platform === 'YouTube') document.getElementById('setup-modal').style.display = 'block';
+            else alert(`${platform} coming soon!`);
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        async function submitCredentials() {
+            const content = document.getElementById('json-input').value;
+            const res = await fetch('/api/setup-credentials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("Setup successful! Now starting secure connection...");
+                window.open('/api/connect/youtube', '_blank');
+                closeModal('setup-modal');
+                updateAccounts();
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function checkStatus() {
+            if (!currentTaskId) return;
+            const res = await fetch(`/api/status/${currentTaskId}`);
+            const data = await res.json();
+            const terminal = document.getElementById('terminal');
+            if (data.logs) {
+                terminal.innerHTML = data.logs.map(l => `<div class="log-entry"> <span style="color: var(--accent); font-weight: bold;">> </span>${l}</div>`).join('');
+                // Use requestAnimationFrame for smoother scroll after render
+                requestAnimationFrame(() => {
+                    terminal.scrollTop = terminal.scrollHeight;
+                });
+            }
+            if (data.status === 'completed') {
+                document.getElementById('loader').style.display = 'none';
+                currentTaskId = null;
+                updateHistory();
+                alert("Generation Complete! Check history.");
+            } else if (data.status === 'failed') {
+                document.getElementById('loader').style.display = 'none';
+                alert(data.error);
+                currentTaskId = null;
+            } else {
+                setTimeout(checkStatus, 3000);
+            }
+        }
+
+        document.getElementById('btn-start').addEventListener('click', async () => {
+            document.getElementById('terminal').style.display = 'block';
+            document.getElementById('terminal').innerHTML = '<div class="log-entry">Initializing Agents...</div>';
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ genre: selectedGenre })
+            });
+            const data = await res.json();
+            currentTaskId = data.task_id;
+            checkStatus();
+        });
+
+        updateHistory();
+        updateAccounts();
+    </script>
+</body>
+</html>
