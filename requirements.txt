@@ -1,9 +1,10 @@
+setuptools
+wheel
 flask
 flask-cors
 python-dotenv
 google-generativeai
 moviepy==1.0.3
-setuptools
 pillow
 requests
 elevenlabs

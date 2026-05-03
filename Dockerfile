@@ -1,22 +1,25 @@
-# Use Python 3.11 for better MoviePy compatibility
-FROM python:3.11-slim
+# Use full Python 3.11 image (more stable for complex media libraries)
+FROM python:3.11
 
-# Install system dependencies
+# Install system dependencies + direct setuptools support
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
+    python3-setuptools \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix ImageMagick policy to allow text rendering (flexible path for different versions)
+# Fix ImageMagick policy
 RUN find /etc/ImageMagick* -name "policy.xml" -exec sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' {} +
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
+
+# Ensure pip and setuptools are at the absolute latest versions first
+RUN pip install --upgrade pip setuptools wheel
 
 # Copy requirements and install
 COPY requirements.txt .
-RUN pip install --upgrade pip setuptools
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
